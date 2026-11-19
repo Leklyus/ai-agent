@@ -105,23 +105,59 @@ Data: [{"bookingid":1}]
 Errors: none
 ```
 
-# Prompt 5.
-Зафиксируй формат ответа для всех tools:
-Status: success | error
-Action: <описание действия>
-Data: <результат API>
-Errors: <если есть>
-# Result 5
-Формат зафиксирован для всех семи инструментов в `response.py`:
-```text
-Status: success
-Action: list_bookings: Найдено бронирований: 1 (HTTP 200)
-Data: [{"bookingid":1}]
-Errors: none
-```
 # Запуск проекта
 Для запуска необходимо указать ключ GigaChat:
 ```bash
 cp .env.example .env   # заполнить GIGACHAT_CREDENTIALS ё
 python main.py "покажи все бронирования"
 ```
+
+# Примеры запуска
+## Запрос 1
+python main.py "найди все бронирования клиента Josh Allen"
+success · list_bookings · HTTP 200
+## Ответ 1
+Нашлось 190 бронирований на имя Josh Allen. Если нужно посмотреть конкретное бронирование или получить дополнительную информацию по какому-либо из них, укажите номер бронирования.
+ID: 15, 16, 21, 25, 27, 28, 36, 40, 42, 44, 49, 53, 56, 61, 64, 68, 70, 72, 78, 79, 85, 86, 91, 95, 101, 102, 107, 108, 114, 118, 120, 124, 128, 132, 134, 138, 143, 146, 148, 154, 157, 159, 
+163, 166, 170, 174, 177, 180, 184, 188, 192, 195, 196, 199, 207, 209, 210, 211, 219, 220, 227, 228, 233, 237, 240, 244, 249, 250, 255, 256, 261, 265, 268, 272
+
+# Запрос 2
+python main.py "что за бронь 102"
+# Ответ 2
+success · get_booking · HTTP 200
+Бронь №102 принадлежит Josh Allen. Заезд 01-01-2018, выезд 01-01-2019. Предоплата внесена, особые пожелания: super bowls.
+{'firstname': 'Josh', 'lastname': 'Allen', 'totalprice': 111, 'depositpaid': True, 'bookingdates': {'checkin': '2018-01-01', 'checkout': '2019-01-01'}, 'additionalneeds': 'super bowls'}
+
+# Запрос 3
+python main.py "найди все бронирования клиента Anonymous" 
+# Ответ 3
+success · list_bookings · HTTP 200
+У клиента Anonymous пока нет забронированных номеров.
+пусто
+
+# Запрос 4
+python main.py "создай бронь на 10 дней для клиента Big client"
+# Ответ 4
+needs_clarification · - · HTTP -
+Уточните дату заезда и внесите ли вы предоплату?
+
+# Запрос 5
+python main.py "создай бронь на 10 дней для клиента Big client. Заезд 2027-02-14. Предоплата имеется. В номере нужен телевизоръ" 
+
+Подтверждение create_booking: {"firstname": "Big", "lastname": "client", "totalprice": 1000, "depositpaid": true, "bookingdates": {"checkin": "2027-02-14", "checkout": "2027-02-24"}, 
+"additionalneeds": "телевизор"}
+Выполнить? [y/N]: Y
+# Ответ 5
+success · create_booking · HTTP 200
+Бронирование создано. ID бронирования: 1264.
+{
+    'bookingid': 1264,
+    'booking': {
+        'firstname': 'Big',
+        'lastname': 'client',
+        'totalprice': 1000,
+        'depositpaid': True,
+        'bookingdates': {'checkin': '2027-02-14', 'checkout': '2027-02-24'},
+        'additionalneeds': 'телевизор'
+    }
+}
